@@ -1,0 +1,131 @@
+/* ── Bubblegum Sans Font ── */
+@import url('https://fonts.googleapis.com/css2?family=Bubblegum+Sans&family=Inter:wght@400;500;600&display=swap');
+
+:root {
+  --font-display: 'Bubblegum Sans', cursive;
+  --font-body:    'Inter', sans-serif;
+
+  /* Dark background stack */
+  --bg-base:     #0a0a0f;
+  --bg-surface:  #111118;
+  --bg-elevated: #18181f;
+  --bg-card:     #1e1e28;
+  --bg-hover:    #25252f;
+
+  /* Yellow / Orange accent palette */
+  --accent-yellow: #f5c518;
+  --accent-orange: #f97316;
+  --accent-amber:  #fbbf24;
+  --accent-fire:   #ef4444;
+  --glow-yellow:   rgba(245, 197, 24, 0.18);
+  --glow-orange:   rgba(249, 115, 22, 0.18);
+
+  /* Text */
+  --ink:       #f0ead6;
+  --ink-muted: #8a8596;
+  --ink-faint: #45424f;
+
+  /* Borders */
+  --border:        #2a2835;
+  --border-accent: rgba(245, 197, 24, 0.3);
+
+  /* Shadows */
+  --shadow-sm:     0 2px 8px rgba(0, 0, 0, 0.4);
+  --shadow-md:     0 4px 20px rgba(0, 0, 0, 0.6);
+  --shadow-card:   0 8px 32px rgba(0, 0, 0, 0.5);
+  --shadow-yellow: 0 0 24px rgba(245, 197, 24, 0.25), 0 4px 16px rgba(0, 0, 0, 0.5);
+  --shadow-orange: 0 0 24px rgba(249, 115, 22, 0.25), 0 4px 16px rgba(0, 0, 0, 0.5);
+
+  /* Border radii */
+  --radius-sm:   8px;
+  --radius-md:   12px;
+  --radius-lg:   16px;
+  --radius-xl:   20px;
+  --radius-full: 9999px;
+}
+
+/* ─────────────────────────────────────
+   Global Reset & Base
+   ───────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  background: var(--bg-base);
+  color: var(--ink);
+  font-family: var(--font-body);
+  margin: 0;
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg-base); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: var(--accent-yellow); }
+
+/* ─────────────────────────────────────
+   Global Keyframes
+   ───────────────────────────────────── */
+@keyframes fadeIn  { from { opacity: 0; transform: translateY(8px);  } to { opacity: 1; transform: translateY(0); } }
+@keyframes fadeUp  { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes float   { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+@keyframes spin-slow { to { transform: rotate(360deg); } }
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 12px rgba(245, 197, 24, 0.2); }
+  50%       { box-shadow: 0 0 28px rgba(245, 197, 24, 0.5); }
+}
+
+/* ─────────────────────────────────────
+   Dashboard Layout
+   ───────────────────────────────────── */
+.dashboard {
+  display: flex;
+  min-height: 100vh;
+  background: var(--bg-base);
+}
+
+.dashboard__main {
+  margin-left: 265px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* ── Shared panel base ── */
+.panel {
+  flex: 1;
+  padding: 2rem 2.5rem;
+  animation: fadeIn 0.3s ease both;
+}
+
+/* ── Mobile sidebar toggle ── */
+.sidebar__toggle {
+  display: none;
+  position: fixed;
+  top: 1rem; left: 1rem;
+  z-index: 200;
+  width: 40px; height: 40px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-sm);
+  color: var(--ink);
+}
+
+/* ── Mobile overlay backdrop ── */
+.sidebar__overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 99;
+}
+
+/* ── Responsive ── */
+@media (max-width: 900px) {
+  .dashboard__main { margin-left: 0; }
+  .sidebar__toggle { display: flex; }
+  .panel { padding: 1.5rem 1.2rem; }
+}

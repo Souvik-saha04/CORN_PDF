@@ -1,0 +1,244 @@
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=DM+Sans:wght@400;500&display=swap');
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+.login-page {
+  min-height: 100vh;
+  background: #0f0f0f;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  font-family: 'DM Sans', sans-serif;
+  position: relative;
+  overflow: hidden;
+}
+
+.login-glow {
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 60% 50% at 50% -10%, rgba(245, 197, 24, 0.13) 0%, transparent 70%),
+    radial-gradient(ellipse 40% 30% at 80% 110%, rgba(245, 197, 24, 0.07) 0%, transparent 60%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.login-card {
+  background: #1e1e1e;
+  border: 1px solid #2a2a2a;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 390px;
+  padding: 36px 32px 32px;
+  position: relative;
+  z-index: 1;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+  animation: slideUp 0.42s cubic-bezier(0.22, 0.68, 0, 1.2) both;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ── Logo ── */
+.login-logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 26px;
+  font-family: 'Sora', sans-serif;
+  font-weight: 700;
+  font-size: 1.3rem;
+  color: #f0f0f0;
+  text-decoration: none;
+}
+
+.login-logo-icon {
+  width: 34px;
+  height: 34px;
+  background: #f5c518;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+}
+
+.login-logo-accent {
+  color: #f5c518;
+}
+
+/* ── Headings ── */
+.login-title {
+  font-family: 'Sora', sans-serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #f0f0f0;
+  margin-bottom: 4px;
+}
+
+.login-subtitle {
+  font-size: 0.84rem;
+  color: #888;
+  margin-bottom: 24px;
+}
+
+/* ── Google Button ── */
+.login-google-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 11px;
+  background: #181818;
+  border: 1px solid #2a2a2a;
+  border-radius: 10px;
+  color: #f0f0f0;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  margin-bottom: 20px;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.login-google-btn:hover {
+  background: #222;
+  border-color: #3a3a3a;
+}
+
+/* ── Divider ── */
+.login-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  font-size: 0.78rem;
+  color: #555;
+}
+
+.login-divider::before,
+.login-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: #2a2a2a;
+}
+
+/* ── Form Fields ── */
+.login-field {
+  margin-bottom: 14px;
+}
+
+.login-label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #bbb;
+  margin-bottom: 5px;
+}
+
+.login-input {
+  width: 100%;
+  padding: 11px 14px;
+  background: #181818;
+  border: 1px solid #2a2a2a;
+  border-radius: 10px;
+  color: #f0f0f0;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.9rem;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.login-input:focus {
+  border-color: #f5c518;
+  box-shadow: 0 0 0 3px rgba(245, 197, 24, 0.12);
+}
+
+.login-input::placeholder {
+  color: #444;
+}
+
+/* ── Forgot ── */
+.login-meta-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 20px;
+}
+
+.login-forgot {
+  font-size: 0.8rem;
+  color: #f5c518;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  padding: 0;
+  transition: opacity 0.2s;
+}
+
+.login-forgot:hover {
+  opacity: 0.75;
+}
+
+/* ── Primary Button ── */
+.login-primary-btn {
+  width: 100%;
+  padding: 12px;
+  background: #f5c518;
+  border: none;
+  border-radius: 10px;
+  color: #111;
+  font-family: 'Sora', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  margin-bottom: 20px;
+  transition: background 0.2s, transform 0.15s;
+}
+
+.login-primary-btn:hover {
+  background: #c49a10;
+}
+
+.login-primary-btn:active {
+  transform: scale(0.98);
+}
+
+/* ── Footer ── */
+.login-footer {
+  text-align: center;
+  font-size: 0.82rem;
+  color: #666;
+}
+
+.login-footer-link {
+  color: #f5c518;
+  background: none;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.82rem;
+  transition: opacity 0.2s;
+}
+
+.login-footer-link:hover {
+  opacity: 0.8;
+}
