@@ -53,14 +53,14 @@ export function CustomAlert({ open, setOpen, title, message }) {
 }
 
 
-
-
-export default function HomePanel() {
+export default function HomePanel({
+    documents,
+    fetchDocuments,
+}) {
 
   const [drag, setDrag] = useState(false);
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [documents, setDocuments] = useState([]);
 
   // 🔥 Alert state
   const [alertOpen, setAlertOpen] = useState(false);
@@ -155,7 +155,7 @@ export default function HomePanel() {
 
     setFile(null);
 
-    await fetchDocuments(user);
+    await fetchDocuments();
 
   } catch (err) {
     console.error(err);
@@ -163,35 +163,8 @@ export default function HomePanel() {
   } finally {
     setLoading(false);
   }
-};
-
-  const fetchDocuments = useCallback(async (user) => {
-    if (!user) return;
-
-    const token = await user.getIdToken();
-
-    try {
-      const res = await fetch("http://127.0.0.1:8000/documents/", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      const data = await res.json();
-      setDocuments(data);
-    } catch {
-      showAlert("Error", "Failed to fetch documents.");
-    }
-  }, [showAlert]);
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        fetchDocuments(user);
-      }
-    });
-    return () => unsubscribe();
-  }, [fetchDocuments]);
+  };
+  
 
   const handleDrop = (e) => {
     e.preventDefault();

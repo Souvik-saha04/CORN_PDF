@@ -8,6 +8,8 @@ from rest_framework import status
 
 from .models import Docs
 from utils.firebase_auth import get_user_from_token
+from ai_engine.processor import process_document,index
+from ai_engine.models import Chunk
 
 
 @api_view(["POST"])
@@ -56,8 +58,9 @@ def create_document(request):
             file_size=uploaded_file.size,
             file_url=result["secure_url"],
             public_id=result["public_id"],
-            status="UPLOADED",
+            status="PROCESSING",
         )
+        process_document(doc)
 
         return Response(
             {
@@ -69,6 +72,7 @@ def create_document(request):
             },
             status=status.HTTP_201_CREATED,
         )
+    
 
     except Exception as e:
 
@@ -138,30 +142,74 @@ def retrieve_document(request, doc_id):
     )
 
 
+
 @api_view(["DELETE"])
 def delete_document(request, doc_id):
+
     user, error = get_user_from_token(request)
 
     if error:
         return Response({"error": error}, status=401)
 
     try:
-        doc = Docs.objects.get(id=doc_id, user=user)
+        doc = Docs.objects.get(
+            id=doc_id,
+            user=user
+        )
 
     except Docs.DoesNotExist:
-        return Response({"error": "Document not found."}, status=404)
+        return Response(
+            {"error": "Document not found."},
+            status=404
+        )
 
     try:
+
+        # ------------------------------------
+        # Get all chunks
+        # ------------------------------------
+
+        chunks = Chunk.objects.filter(document=doc)
+
+        vector_ids = [
+            f"{doc.id}_{chunk.id}"
+            for chunk in chunks
+        ]
+
+        # ------------------------------------
+        # Delete vectors from Pinecone
+        # ------------------------------------
+
+        if vector_ids:
+            index.delete(ids=vector_ids)
+
+        # ------------------------------------
+        # Delete PDF from Cloudinary
+        # ------------------------------------
+
         cloudinary.uploader.destroy(
             doc.public_id,
             resource_type="raw",
         )
-    except Exception:
-        pass
 
-    doc.delete()
+        # ------------------------------------
+        # Delete document
+        # ------------------------------------
 
-    return Response(
-        {"message": "Document deleted successfully."},
-        status=status.HTTP_200_OK,
-    )
+        doc.delete()
+
+        return Response(
+            {
+                "message": "Document deleted successfully."
+            },
+            status=status.HTTP_200_OK,
+        )
+
+    except Exception as e:
+
+        return Response(
+            {
+                "error": str(e)
+            },
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )

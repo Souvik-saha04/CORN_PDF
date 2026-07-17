@@ -1,17 +1,16 @@
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from documents.models import Docs
-from .models import Chunk,QueryHistory
+from .models import QueryHistory
 
 from pinecone import Pinecone
-from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from langchain_pinecone import PineconeVectorStore
-from langchain_community.document_loaders import PyPDFLoader
 from langchain_google_genai import ChatGoogleGenerativeAI
 import json
 import os
 from dotenv import load_dotenv
+from utils.firebase_auth import get_user_from_token
 
 load_dotenv()
 
@@ -33,66 +32,10 @@ index = pc.Index("pdf-qna-3072")
 
 
 llm = ChatGoogleGenerativeAI(
-    model="gemini-1.5-flash",
+    model="gemini-3.5-flash",
     temperature=0.3,
     api_key=GEMINI_API_KEY
 )
-
-
-@csrf_exempt
-def process_document(request):
-    if request.method != "POST":
-        return JsonResponse({"error": "Invalid request"}, status=400)
-
-    data = json.loads(request.body)
-    document_id = data.get("document_id")
-
-    try:
-        document = Docs.objects.get(id=document_id)
-    except Docs.DoesNotExist:
-        return JsonResponse({"error": "Document not found"}, status=404)
-
-    loader = PyPDFLoader(document.file.path)
-    pages = loader.load()
-
-    full_text = "\n".join([page.page_content for page in pages])
-
-    splitter = RecursiveCharacterTextSplitter(
-        chunk_size=500,
-        chunk_overlap=50
-    )
-    texts = splitter.split_text(full_text)
-
-    chunks = []
-    for i, chunk_text in enumerate(texts):
-        chunk = Chunk.objects.create(
-            document=document,
-            content=chunk_text,
-            chunk_index=i,
-            page_number=None  
-        )
-        chunks.append(chunk)
-
-    vectorstore = PineconeVectorStore(
-        index=index,
-        embedding=embeddings
-    )
-
-    vectorstore.add_texts(
-        texts=[c.content for c in chunks],
-        metadatas=[
-            {
-                "chunk_id": c.id,
-                "document_id": document.id
-            }
-            for c in chunks
-        ]
-    )
-
-    return JsonResponse({
-        "message": "Document processed successfully",
-        "chunks_created": len(chunks)
-    })
 
 
 
@@ -102,6 +45,9 @@ def process_document(request):
 def ask_question(request):
     if request.method != "POST":
         return JsonResponse({"error": "Invalid request"}, status=400)
+    user, error = get_user_from_token(request)
+    if error:
+        return JsonResponse({"error": error}, status=401)
 
     data = json.loads(request.body)
     question = data.get("question")
@@ -111,9 +57,15 @@ def ask_question(request):
         return JsonResponse({"error": "Missing fields"}, status=400)
 
     try:
-        document = Docs.objects.get(id=document_id)
+        document = Docs.objects.get(
+            id=document_id,
+            user=user
+        )
     except Docs.DoesNotExist:
-        return JsonResponse({"error": "Document not found"}, status=404)
+        return JsonResponse(
+            {"error": "Document not found"},
+            status=404
+        )
 
     vectorstore = PineconeVectorStore(
         index=index,
@@ -129,23 +81,56 @@ def ask_question(request):
 
     docs = retriever.invoke(question)
 
-    context = "\n\n".join([doc.page_content for doc in docs])
+    if not docs:
+        return JsonResponse(
+            {
+                "answer": "I couldn't find any relevant information in this document."
+            }
+        )
 
+    context = "\n\n".join(doc.page_content for doc in docs)
     prompt = f"""
-    Answer the question based ONLY on the context below.
+    You are a PDF Question Answering assistant.
+
+    Try to answer  using the provided context.
+
+    If the answer cannot be found in the context,
+
+    give it according to your knowledge ,just for that chat you can ignore the context 
+    Formatting rules:
+    - Use short paragraphs.
+    - Use bullet points whenever appropriate.
+    - Use numbered lists for multiple points.
+    - Use Markdown formatting.
+    - Keep the answer clean and easy to read.
+    - Do not write one long paragraph.
 
     Context:
     {context}
 
     Question:
     {question}
+
+    Answer:
     """
 
     response = llm.invoke(prompt)
-    answer = response.content
+
+    if isinstance(response.content, str):
+        answer = response.content
+
+    elif isinstance(response.content, list):
+        answer = "".join(
+            part.get("text", "")
+            for part in response.content
+            if isinstance(part, dict)
+        )
+
+    else:
+        answer = str(response.content)
 
     QueryHistory.objects.create(
-        user=request.user if request.user.is_authenticated else None,
+        user=user,
         document=document,
         question=question,
         answer=answer,

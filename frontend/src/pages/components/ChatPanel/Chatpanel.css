@@ -16,7 +16,57 @@
 }
 
 .chat-panel__doc-info { flex: 1; }
+.chat-doc-selector {
+  background: #1d1d1d;
+  color: white;
+  border: 1px solid #3a3a3a;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 0.95rem;
+  margin-bottom: 6px;
+  cursor: pointer;
+  width: 240px;
+}
+.message__bubble {
+    line-height: 1.7;
+}
 
+.message__bubble h1,
+.message__bubble h2,
+.message__bubble h3 {
+    margin: 12px 0;
+}
+
+.message__bubble p {
+    margin: 8px 0;
+}
+
+.message__bubble ul,
+.message__bubble ol {
+    padding-left: 20px;
+    margin: 10px 0;
+}
+
+.message__bubble li {
+    margin: 6px 0;
+}
+
+.message__bubble code {
+    background: #2b2b2b;
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+.message__bubble pre {
+    background: #1d1d1d;
+    padding: 12px;
+    border-radius: 8px;
+    overflow-x: auto;
+}
+.chat-doc-selector:focus {
+  outline: none;
+  border-color: #f5c518;
+}
 .chat-panel__doc-name {
   font-family: var(--font-display);
   font-size: 0.9rem;

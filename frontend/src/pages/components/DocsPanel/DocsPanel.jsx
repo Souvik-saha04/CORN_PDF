@@ -1,6 +1,8 @@
 import './DocsPanel.css';
+import { File } from "lucide-react";
+import { Trash } from "lucide-react";
 
-export default function DocsPanel({ docs, onDocSelect }) {
+export default function DocsPanel({ docs, onDocSelect,onDelete}) {
   return (
     <div className="docs-panel">
       <h2 className="docs-panel__title">My Documents</h2>
@@ -9,13 +11,22 @@ export default function DocsPanel({ docs, onDocSelect }) {
       <div className="docs-panel__grid">
         {docs.map(doc => (
           <button key={doc.id} className="docs-card" onClick={() => onDocSelect(doc)}>
-            <div className="docs-card__icon" style={{ background: `linear-gradient(135deg, ${doc.color}, ${doc.color}88)` }}>
-              {doc.emoji}
+            <div>
+              <File className="docs-card__icon" color="grey"/>
             </div>
+
             <div className="docs-card__info">
-              <div className="docs-card__name">{doc.name}</div>
-              <div className="docs-card__meta">{doc.size} · {doc.date}</div>
+
+                <div className="docs-card__name">
+                    {doc.file_name}
+                </div>
+
+                <div className="docs-card__meta">
+                    {doc.status}
+                </div>
+
             </div>
+            <Trash className="docs-card__delete" size={22} color="red" strokeWidth={2} onClick={(e) => {e.stopPropagation();  onDelete(doc.id);}}/>
           </button>
         ))}
       </div>
