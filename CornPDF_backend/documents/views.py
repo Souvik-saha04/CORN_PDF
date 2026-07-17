@@ -160,56 +160,60 @@ def delete_document(request, doc_id):
     except Docs.DoesNotExist:
         return Response(
             {"error": "Document not found."},
-            status=404
+            status=status.HTTP_404_NOT_FOUND,
         )
+
+    # ------------------------------------
+    # Delete vectors (if they exist)
+    # ------------------------------------
 
     try:
-
-        # ------------------------------------
-        # Get all chunks
-        # ------------------------------------
-
         chunks = Chunk.objects.filter(document=doc)
 
-        vector_ids = [
-            f"{doc.id}_{chunk.id}"
-            for chunk in chunks
-        ]
+        if chunks.exists():
 
-        # ------------------------------------
-        # Delete vectors from Pinecone
-        # ------------------------------------
+            vector_ids = [
+                f"{doc.id}_{chunk.id}"
+                for chunk in chunks
+            ]
 
-        if vector_ids:
             index.delete(ids=vector_ids)
 
-        # ------------------------------------
-        # Delete PDF from Cloudinary
-        # ------------------------------------
+    except Exception as e:
+        print(f"Pinecone deletion failed: {e}")
 
-        cloudinary.uploader.destroy(
-            doc.public_id,
-            resource_type="raw",
-        )
+    # ------------------------------------
+    # Delete PDF from Cloudinary
+    # ------------------------------------
 
-        # ------------------------------------
-        # Delete document
-        # ------------------------------------
-
-        doc.delete()
-
-        return Response(
-            {
-                "message": "Document deleted successfully."
-            },
-            status=status.HTTP_200_OK,
-        )
+    try:
+        if doc.public_id:
+            cloudinary.uploader.destroy(
+                doc.public_id,
+                resource_type="raw",
+            )
 
     except Exception as e:
+        print(f"Cloudinary deletion failed: {e}")
 
+    # ------------------------------------
+    # Delete database record
+    # ------------------------------------
+
+    try:
+        doc.delete()
+
+    except Exception as e:
         return Response(
             {
-                "error": str(e)
+                "error": f"Database deletion failed: {str(e)}"
             },
             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
+
+    return Response(
+        {
+            "message": "Document deleted successfully."
+        },
+        status=status.HTTP_200_OK,
+    )

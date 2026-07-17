@@ -139,7 +139,7 @@ export default function ChatPanel({
 
         </div>
 
-        <div className="chat-panel__actions">
+        {/* <div className="chat-panel__actions">
           <button className="chip-btn">
             🧩 <span>Quiz</span>
           </button>
@@ -155,7 +155,7 @@ export default function ChatPanel({
           <button className="chip-btn">
             ↗ <span>Share</span>
           </button>
-        </div>
+        </div> */}
       </div>
 
       <div className="chat-messages">
@@ -215,7 +215,7 @@ export default function ChatPanel({
       </div>
 
       <div className="chat-input-bar">
-        <div className="chat-suggestions">
+        {/* <div className="chat-suggestions">
           {SUGGESTIONS.map((suggestion) => (
             <button
               key={suggestion}
@@ -228,7 +228,7 @@ export default function ChatPanel({
               {suggestion}
             </button>
           ))}
-        </div>
+        </div> */}
 
         <div className="chat-input-row">
           <textarea

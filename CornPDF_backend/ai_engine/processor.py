@@ -24,34 +24,17 @@ embeddings = GoogleGenerativeAIEmbeddings(
 )
 
 pc = Pinecone(api_key=os.getenv("PINECONE_SECRET"))
-
 index = pc.Index("pdf-qna-3072")
 
 
-
 def process_document(document):
-    """
-    Processes an uploaded PDF:
-    - Downloads PDF from Cloudinary
-    - Splits into chunks
-    - Generates embeddings
-    - Stores vectors in Pinecone
-    """
 
     temp_pdf_path = None
 
     try:
 
-        # -----------------------------
-        # Update status
-        # -----------------------------
-
         document.status = "PROCESSING"
         document.save()
-
-        # -----------------------------
-        # Download PDF
-        # -----------------------------
 
         response = requests.get(
             document.file_url,
@@ -65,27 +48,25 @@ def process_document(document):
             temp_pdf.write(response.content)
             temp_pdf_path = temp_pdf.name
 
-        # -----------------------------
-        # Load PDF
-        # -----------------------------
-
         loader = PyPDFLoader(temp_pdf_path)
-        pages = loader.load()
-        if not pages:
-            raise Exception("PDF contains no readable text.")
 
-        # -----------------------------
-        # Split into chunks
-        # -----------------------------
+        pages = loader.lazy_load()
 
         splitter = RecursiveCharacterTextSplitter(
             chunk_size=1000,
             chunk_overlap=200
         )
 
-        all_texts = []
-        all_metadatas = []
-        vector_ids = []
+        vectorstore = PineconeVectorStore(
+            index=index,
+            embedding=embeddings,
+        )
+
+        BATCH_SIZE = 100
+
+        batch_texts = []
+        batch_metadatas = []
+        batch_ids = []
 
         chunk_index = 0
 
@@ -94,8 +75,10 @@ def process_document(document):
             page_chunks = splitter.split_text(page.page_content)
 
             for chunk_text in page_chunks:
+
                 if not chunk_text.strip():
                     continue
+
                 chunk = Chunk.objects.create(
                     document=document,
                     content=chunk_text,
@@ -103,43 +86,41 @@ def process_document(document):
                     page_number=page_number,
                 )
 
-                all_texts.append(chunk_text)
+                batch_texts.append(chunk_text)
 
-                all_metadatas.append(
-                    {
-                        "chunk_id": chunk.id,
-                        "document_id": document.id,
-                        "user_id": document.user.firebase_uid,
-                        "page_number": page_number,
-                        "file_name": document.file_name,
-                        "text": chunk_text
-                    }
-                )
+                batch_metadatas.append({
+                    "chunk_id": chunk.id,
+                    "document_id": document.id,
+                    "user_id": document.user.firebase_uid,
+                    "page_number": page_number,
+                    "file_name": document.file_name,
+                })
 
-                vector_ids.append(
+                batch_ids.append(
                     f"{document.id}_{chunk.id}"
                 )
 
                 chunk_index += 1
 
-        # -----------------------------
-        # Store in Pinecone
-        # -----------------------------
+                if len(batch_texts) == BATCH_SIZE:
 
-        vectorstore = PineconeVectorStore(
-            index=index,
-            embedding=embeddings,
-        )
+                    vectorstore.add_texts(
+                        texts=batch_texts,
+                        metadatas=batch_metadatas,
+                        ids=batch_ids,
+                    )
 
-        vectorstore.add_texts(
-            texts=all_texts,
-            metadatas=all_metadatas,
-            ids=vector_ids,
-        )
+                    batch_texts.clear()
+                    batch_metadatas.clear()
+                    batch_ids.clear()
 
-        # -----------------------------
-        # Success
-        # -----------------------------
+        if batch_texts:
+
+            vectorstore.add_texts(
+                texts=batch_texts,
+                metadatas=batch_metadatas,
+                ids=batch_ids,
+            )
 
         document.status = "READY"
         document.save()

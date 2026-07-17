@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import {FileSearchCorner} from "lucide-react";
 import "./Dashboard.css";
 
 import Sidebar from "./components/Sidebar/Sidebar";
@@ -22,6 +23,7 @@ export default function Dashboard() {
   const [activeView, setActiveView] = useState("home");
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [deletingDocId, setDeletingDocId] = useState(null);
 
   useEffect(() => {
 
@@ -73,38 +75,39 @@ export default function Dashboard() {
 };
 
   const handleDeleteDocument = async (docId) => {
-  try {
-    const token = await user.getIdToken();
+    try {
+        setDeletingDocId(docId);
 
-    const response = await fetch(
-      `http://127.0.0.1:8000/documents/${docId}/delete/`,
-      {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
+        const token = await user.getIdToken();
 
-    const data = await response.json();
+        const response = await fetch(
+            `http://127.0.0.1:8000/documents/${docId}/delete/`,
+            {
+                method: "DELETE",
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            }
+        );
 
-    if (!response.ok) {
-      throw new Error(data.error || "Failed to delete document");
+        if (!response.ok) {
+            if (!response.ok) {
+              const error = await response.json();
+              throw new Error(error.error || "Failed to delete document");
+          }
+        }
+
+        setDocuments((prev) => prev.filter((doc) => doc.id !== docId));
+
+        if (activeDoc?.id === docId) {
+          setActiveDoc(null);
+        }
+    } catch (err) {
+        console.error(err);
+        alert("Failed to delete document.");
+    } finally {
+        setDeletingDocId(null);
     }
-
-    // Remove deleted document from state
-    setDocuments((prev) => prev.filter((doc) => doc.id !== docId));
-
-    // If the deleted document was selected
-    if (activeDoc?.id === docId) {
-      setActiveDoc(null);
-      setActiveView("docs");
-    }
-
-  } catch (err) {
-    console.error(err);
-    alert(err.message);
-  }
 };
   
 
@@ -128,7 +131,7 @@ export default function Dashboard() {
           id: activeDoc.id,
           name: activeDoc.file_name,
           size: `${(activeDoc.file_size / 1024 / 1024).toFixed(2)} MB`,
-          emoji: "📄",
+          emoji: <FileSearchCorner/>,
         }}
         documents={documents}
         onDocSelect={handleDocSelect}
@@ -146,10 +149,10 @@ export default function Dashboard() {
 
     docs: (
       <DocsPanel
-        docs={documents}
-      onDocSelect={handleDocSelect}
-      onDelete={handleDeleteDocument}
-      />
+    docs={documents}
+    onDocSelect={handleDocSelect}
+    onDelete={handleDeleteDocument}
+    deletingDocId={deletingDocId}/>
     ),
   };
 
