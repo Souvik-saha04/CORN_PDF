@@ -44,7 +44,6 @@ export function Login() {
       });
 
       localStorage.setItem("token", token);
-      console.log(token);
 
       navigate('/dashboard'); // optional redirect
     } catch (error) {

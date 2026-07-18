@@ -15,7 +15,10 @@ def firebase_auth(request):
     try:
         token = auth_header.split(" ")[1]
 
-        decoded_token = auth.verify_id_token(token)
+        decoded_token = auth.verify_id_token(
+            token,
+            clock_skew_seconds=5
+        )
 
         user = get_or_create_user_from_firebase(decoded_token)
 

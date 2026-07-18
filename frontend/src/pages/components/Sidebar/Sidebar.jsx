@@ -21,7 +21,7 @@ export default function Sidebar({ activeView, setActiveView, isOpen }) {
         <img src="/cornPDF_logo.png" alt="cornPDF logo" />
       </div>
 
-      <button className="sidebar__upload-btn" onClick={() => setActiveView('docs')}>
+      <button className="sidebar__upload-btn" onClick={() => setActiveView('home')}>
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
           <line x1="12" y1="5" x2="12" y2="19" />
           <line x1="5" y1="12" x2="19" y2="12" />
@@ -52,13 +52,7 @@ export default function Sidebar({ activeView, setActiveView, isOpen }) {
         </button>
       </nav>
 
-      <div className="premium-banner" style={{ marginTop: 'auto' }}>
-        <div>
-          <div className="premium-banner__text">⚡ Premium</div>
-          <div className="premium-banner__price">$19 / month</div>
-        </div>
-        <button className="premium-banner__btn">›</button>
-      </div>
+      
 
     </aside>
   );

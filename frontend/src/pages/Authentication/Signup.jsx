@@ -51,7 +51,6 @@ export function Signup() {
       });
 
       localStorage.setItem("token", token);
-      console.log(token);
       navigate('/dashboard');
 
     } catch (error) {

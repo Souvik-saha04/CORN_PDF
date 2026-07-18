@@ -37,10 +37,6 @@ llm = ChatGoogleGenerativeAI(
     api_key=GEMINI_API_KEY
 )
 
-
-
-
-
 @csrf_exempt
 def ask_question(request):
     if request.method != "POST":
@@ -74,7 +70,7 @@ def ask_question(request):
 
     retriever = vectorstore.as_retriever(
         search_kwargs={
-            "k": 3,
+            "k": 10,####################################
             "filter": {"document_id": document.id}
         }
     )
