@@ -76,6 +76,7 @@ function formatBytes(bytes) {
 export default function HomePanel({
     documents,
     fetchDocuments,
+    setActiveView,
 }) {
 
   const [drag, setDrag] = useState(false);
@@ -102,12 +103,47 @@ export default function HomePanel({
   }, []);
 
   const features = [
-    { emoji: <MessageSquareMore size={26} strokeWidth={1.75} />, title: 'Ask Questions', desc: 'Chat with your documents naturally', spotlight: true },
-    { emoji: <NotebookPen size={26} strokeWidth={1.75} />, title: 'Smart Summaries', desc: 'Get concise overviews in seconds' },
-    { emoji: <Puzzle size={26} strokeWidth={1.75} />, title: 'Generate Quizzes', desc: 'Test your knowledge automatically' },
-    { emoji: <Microscope size={26} strokeWidth={1.75} />, title: 'Semantic Search', desc: 'Find anything across all documents' },
-    { emoji: <Lightbulb size={26} strokeWidth={1.75} />, title: 'Extract Insights', desc: 'Surface hidden patterns & key data' },
-  ];
+  {
+    id: 'chat',
+    emoji: <MessageSquareMore size={20} strokeWidth={1.75} />,
+    title: 'Ask Questions',
+    desc: 'Chat with your documents naturally and get instant answers.',
+    image: 'ask_questions.jpg',
+    meta: ['⚡ Instant', '💬 Natural language'],
+    cta: 'Start chatting',
+    spotlight: true
+  },
+  {
+    id: 'quiz',
+    emoji: <Puzzle size={20} strokeWidth={1.75} />,
+    title: 'Generate Quizzes',
+    desc: 'Test your knowledge automatically.',
+    image: 'quiz.avif',
+    meta: ['🎯 Adaptive'],
+    cta: 'Create quiz',
+    spotlight: false
+  },
+  {
+    id: 'summary',
+    emoji: <NotebookPen size={20} strokeWidth={1.75} />,
+    title: 'Smart Summaries',
+    desc: 'Get concise overviews in seconds.',
+    image: 'summary.jpg',
+    meta: ['📝 Auto-generated'],
+    cta: 'Summarize now',
+    spotlight: true
+  },
+  {
+    id: 'search',
+    emoji: <Microscope size={20} strokeWidth={1.75} />,
+    title: 'Semantic Search',
+    desc: 'Find anything across all documents.',
+    image: 'semantic_search.jpg',
+    meta: ['🔍 Cross-document'],
+    cta: 'Search now',
+    spotlight: false
+  },
+];
 
   // Derived, read-only — groups existing `documents` by their status field.
   // No new requests are made; this only reshapes data already fetched.
@@ -257,18 +293,32 @@ export default function HomePanel({
               </button>
             </DropdownMenuTrigger>
 
-            <DropdownMenuContent>
-              <DropdownMenuGroup>
-                <DropdownMenuItem>Profile</DropdownMenuItem>
-                <DropdownMenuItem>Billing</DropdownMenuItem>
-                <DropdownMenuItem>Settings</DropdownMenuItem>
-              </DropdownMenuGroup>
+            <DropdownMenuContent
+                align="end"
+                className="avatar-dropdown"
+            >
+                <DropdownMenuGroup>
+                    <DropdownMenuItem className="dropdown-item">
+                        Profile
+                    </DropdownMenuItem>
 
-              <DropdownMenuSeparator />
+                    <DropdownMenuItem className="dropdown-item">
+                        Billing
+                    </DropdownMenuItem>
 
-              <DropdownMenuItem onClick={Logout}>
-                Log out
-              </DropdownMenuItem>
+                    <DropdownMenuItem className="dropdown-item">
+                        Settings
+                    </DropdownMenuItem>
+                </DropdownMenuGroup>
+
+                <DropdownMenuSeparator />
+
+                <DropdownMenuItem
+                    className="dropdown-item"
+                    onClick={Logout}
+                >
+                    Log out
+                </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
 
@@ -352,18 +402,34 @@ export default function HomePanel({
 
       {/* New: asymmetric bento layout — first card is the spotlight */}
       <div className="feature-grid">
-        {features.map(f => (
-          <div
-            key={f.title}
-            className={`feature-card ${f.spotlight ? 'feature-card--spotlight' : ''}`}
-            onClick={() => showAlert("Feature", "Feature selected")}
-          >
-            <span className="feature-card__emoji">{f.emoji}</span>
-            <div className="feature-card__title">{f.title}</div>
-            <div className="feature-card__desc">{f.desc}</div>
-          </div>
-        ))}
+  {features.map(f => (
+    <div
+      key={f.title}
+      className={`feature-card ${f.spotlight ? 'feature-card--spotlight' : ''}`}
+      style={{ backgroundImage: `url(${f.image})` }}
+      onClick={() => setActiveView(f.id)}
+    >
+      <div className="feature-card__overlay" />
+      <div className="feature-card__content">
+        <div className="feature-card__title">{f.title}</div>
+        <div className="feature-card__desc">{f.desc}</div>
+
+        <div className="feature-card__meta">
+          {f.meta.map((m, i) => (
+            <span className="feature-card__chip" key={i}>{m}</span>
+          ))}
+        </div>
+
+        <button
+          className="feature-card__btn"
+          onClick={(e) => { e.stopPropagation(); setActiveView(f.id); }}
+        >
+          {f.cta}
+        </button>
       </div>
+    </div>
+  ))}
+</div>
 
       <div className="recent-docs">
         <div className="recent-docs__bar">

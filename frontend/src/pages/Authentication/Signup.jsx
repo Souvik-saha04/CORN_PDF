@@ -1,4 +1,5 @@
 import { useState } from "react";
+import {LoaderPinwheel} from "lucide-react";
 import {
   createUserWithEmailAndPassword,
   GoogleAuthProvider,
@@ -26,13 +27,14 @@ export function Signup() {
   });
   const navigate = useNavigate();
   const [agreed, setAgreed] = useState(false);
+  const [loading,setLoading]=useState(false);
 
   const handleChange = (e) =>
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
 
   const registerwithemail = async (e) => {
     e.preventDefault();
-
+    setLoading(true);
     try {
       const userCred = await createUserWithEmailAndPassword(
         auth,
@@ -56,9 +58,13 @@ export function Signup() {
     } catch (error) {
       alert(error.message);
     }
+    finally{
+      setLoading(false);
+    }
   };
 
   const signupwithGoogle = async () => {
+     setLoading(true);
     try {
       const provider = new GoogleAuthProvider();
 
@@ -79,6 +85,9 @@ export function Signup() {
 
     } catch (error) {
       console.error(error);
+    }
+    finally{
+       setLoading(false);
     }
   };
 
@@ -165,8 +174,8 @@ export function Signup() {
             </label>
           </div>
 
-          <button className="signup-primary-btn" type="submit">
-            Create Account
+          <button className="signup-primary-btn" type="submit" >
+            {loading ? <LoaderPinwheel className="loader-spinner"/> : "Create Account" }
           </button>
         </form>
 

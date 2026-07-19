@@ -1,5 +1,6 @@
 import { useState } from "react";
 import "./Login.css";
+import { LoaderPinwheel } from 'lucide-react';
 import {
   signInWithEmailAndPassword,
   GoogleAuthProvider,
@@ -19,11 +20,14 @@ const GoogleIcon = () => (
 
 export function Login() {
   const [form, setForm] = useState({ email: "", password: "" });
+  const [loading,setLoading]=useState(false);
+
   const navigate = useNavigate();
   const handleChange = (e) =>
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
 
   const loginwithemail = async (e) => {
+    setLoading(true);
     e.preventDefault();
 
     try {
@@ -32,9 +36,10 @@ export function Login() {
         form.email,
         form.password
       );
+      
 
       const token = await userCred.user.getIdToken();
-
+      
       await fetch("http://127.0.0.1:8000/user/auth/", {
         method: "POST",
         headers: {
@@ -49,9 +54,14 @@ export function Login() {
     } catch (error) {
       alert(error.message);
     }
+    finally
+    {
+      setLoading(false);
+    }
   };
 
   const loginwithGoogle = async () => {
+    setLoading(true);
     try {
       const provider = new GoogleAuthProvider();
 
@@ -71,6 +81,9 @@ export function Login() {
       navigate('/dashboard');
     } catch (error) {
       console.error(error);
+    }
+    finally{
+      setLoading(false);
     }
   };
 
@@ -92,6 +105,7 @@ export function Login() {
           className="login-google-btn"
           type="button"
           onClick={loginwithGoogle}
+          disabled={loading}
         >
           <GoogleIcon />
           Continue with Google
@@ -138,8 +152,8 @@ export function Login() {
             </button>
           </div>
 
-          <button className="login-primary-btn" type="submit">
-            Log In
+          <button className="login-primary-btn" type="submit" disabled={loading}>
+            {loading? <LoaderPinwheel className="loader-spinner"/> : "Log In"}
           </button>
         </form>
 

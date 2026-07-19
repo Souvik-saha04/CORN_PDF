@@ -123,7 +123,7 @@ export default function Dashboard() {
 
   const panels = {
     home: <HomePanel documents={documents}
-        fetchDocuments={fetchDocuments} />,
+        fetchDocuments={fetchDocuments} setActiveView={setActiveView}/>,
 
     chat: activeDoc ? (
       <ChatPanel
