@@ -64,16 +64,22 @@ export default function Dashboard() {
 
     setDocuments(data);
 
-    if (data.length > 0) {
-      setActiveDoc(data[0]);
-    } else {
-      setActiveDoc(null);
-    }
+    const readyDocs = data.filter(doc => doc.status === "READY");
+
+  if (readyDocs.length > 0) {
+    setActiveDoc(readyDocs[0]);
+  } else {
+    setActiveDoc(null);
+  }
   } catch (error) {
     console.error("Failed to load documents", error);
   }
 };
-
+const processedDocuments = documents.filter(
+  doc => doc.status === "READY"
+);
+console.log(documents);
+console.log(processedDocuments);
   const handleDeleteDocument = async (docId) => {
     try {
         setDeletingDocId(docId);
@@ -112,9 +118,11 @@ export default function Dashboard() {
   
 
   const handleDocSelect = (doc) => {
-    setActiveDoc(doc);
-    setActiveView("chat");
-  };
+  if (doc.status !== "READY") return;
+
+  setActiveDoc(doc);
+  setActiveView("chat");
+};
 
   const userName =
     user?.displayName ||
@@ -122,33 +130,32 @@ export default function Dashboard() {
     "User";
 
   const panels = {
-    home: <HomePanel documents={documents}
-        fetchDocuments={fetchDocuments} 
-        setActiveView={setActiveView} 
-        docs={documents}
-        onDocSelect={handleDocSelect}
-        onDelete={handleDeleteDocument}
-        deletingDocId={deletingDocId}/>,
+    home: <HomePanel documents={processedDocuments}
+          fetchDocuments={fetchDocuments} 
+          setActiveView={setActiveView} 
+          docs={documents}
+          onDocSelect={handleDocSelect}
+          onDelete={handleDeleteDocument}
+          deletingDocId={deletingDocId}/>,
 
     chat: activeDoc ? (
-      <ChatPanel
-        doc={{
-          id: activeDoc.id,
-          name: activeDoc.file_name,
-          size: `${(activeDoc.file_size / 1024 / 1024).toFixed(2)} MB`,
-          emoji: <FileSearchCorner/>,
-        }}
-        documents={documents}
-        onDocSelect={handleDocSelect}
-        userName={userName}
-      />
+        <ChatPanel
+          doc={{
+            id: activeDoc.id,
+            name: activeDoc.file_name,
+            size: `${(activeDoc.file_size / 1024 / 1024).toFixed(2)} MB`,
+            emoji: <FileSearchCorner/>,
+          }}
+          documents={processedDocuments}
+          onDocSelect={handleDocSelect}
+          userName={userName}/>
     ) : (
       <div>No document selected.</div>
     ),
 
     summary: <SummaryPanel doc={activeDoc} />,
 
-    quiz: <QuizPanel doc={activeDoc} documents={documents}/>,
+    quiz: <QuizPanel doc={activeDoc} documents={processedDocuments}/>,
 
     // search: <SearchPanel />,
 

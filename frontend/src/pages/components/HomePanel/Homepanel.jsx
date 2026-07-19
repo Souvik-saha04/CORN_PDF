@@ -121,7 +121,7 @@ export default function HomePanel({
     image: 'quiz.avif',
     meta: ['🎯 Adaptive'],
     cta: 'Create quiz',
-    spotlight: false
+    spotlight: true
   },
   {
     id: 'summary',
@@ -131,7 +131,7 @@ export default function HomePanel({
     image: 'summary.jpg',
     meta: ['📝 Auto-generated'],
     cta: 'Summarize now',
-    spotlight: true
+    spotlight: false
   },
   {
     id: 'search',
@@ -536,7 +536,7 @@ export default function HomePanel({
                 <div className="docs-card__info">
                   <div className="docs-card__name">{doc.file_name}</div>
                   <div className="docs-card__meta">
-                    Last updated {new Date(doc.uploaded_at).toLocaleDateString()}
+                    Uploaded at {new Date(doc.uploaded_at).toLocaleDateString()}
                   </div>
                 </div>
               </div>
