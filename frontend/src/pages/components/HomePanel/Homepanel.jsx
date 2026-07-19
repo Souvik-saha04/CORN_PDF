@@ -1,36 +1,28 @@
 import { useState, useRef, useMemo, useCallback } from 'react';
-import { File, MessageSquareMore, NotebookPen, Puzzle, Microscope, Lightbulb, UploadCloud, X, LayoutGrid, List, Search, AlertTriangle, CheckCircle2, Info } from "lucide-react";
+import {
+  File, MessageSquareMore, NotebookPen, Puzzle, Microscope, Lightbulb,
+  UploadCloud, X, LayoutGrid, List, Search, AlertTriangle, CheckCircle2, Info,
+  FileText, MessageSquareText, Eye, Trash2, LoaderCircle, Clock, MoreVertical
+} from "lucide-react";
 
 import './Homepanel.css';
 import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
+  Avatar, AvatarFallback, AvatarImage,
 } from "@/components/ui/avatar";
 
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
+  DropdownMenu, DropdownMenuContent, DropdownMenuGroup,
+  DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
 import { signOut } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
 import { auth } from '@/firebase/config';
-
 
 export function CustomAlert({ open, setOpen, title, message }) {
   // Purely presentational — picks an icon/tone based on the title text.
@@ -77,25 +69,33 @@ export default function HomePanel({
     documents,
     fetchDocuments,
     setActiveView,
+    onDocSelect,
+    onDelete,
+    onViewDoc,
+    deletingDocId,
 }) {
 
   const [drag, setDrag] = useState(false);
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
-
-  // New UI-only state — client-side search & view toggle for the docs list.
   const [docQuery, setDocQuery] = useState("");
-  const [docView, setDocView] = useState("grid"); // "grid" | "list"
+  const [docView, setDocView] = useState("grid");
+  const [deleteTarget, setDeleteTarget] = useState(null);
 
-  // 🔥 Alert state
   const [alertOpen, setAlertOpen] = useState(false);
-  const [alertContent, setAlertContent] = useState({
-    title: "",
-    message: "",
-  });
+  const [alertContent, setAlertContent] = useState({ title: "", message: "" });
+  
 
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
+
+
+  const confirmDelete = () => {
+    if (deleteTarget && onDelete) {
+      onDelete(deleteTarget.id);
+      setDeleteTarget(null);
+    }
+  };
 
   const showAlert = useCallback((title, message) => {
     setAlertContent({ title, message });
@@ -326,21 +326,7 @@ export default function HomePanel({
         </h1>
         <p className="home-panel__sub">What would you like to explore today?</p>
 
-        {/* New: quick-glance stats strip, derived from documents already in props */}
-        {documents && documents.length > 0 && (
-          <div className="stats-strip">
-            <div className="stats-strip__chip stats-strip__chip--total">
-              <span className="stats-strip__value">{documents.length}</span>
-              <span className="stats-strip__label">Total Docs</span>
-            </div>
-            {Object.entries(statusCounts).map(([status, count]) => (
-              <div className="stats-strip__chip" key={status}>
-                <span className="stats-strip__value">{count}</span>
-                <span className="stats-strip__label">{status}</span>
-              </div>
-            ))}
-          </div>
-        )}
+        
       </div>
 
       <div
@@ -432,10 +418,27 @@ export default function HomePanel({
 </div>
 
       <div className="recent-docs">
+        
         <div className="recent-docs__bar">
+          
           <div className="recent-docs__title">Recent Documents</div>
 
           <div className="recent-docs__controls">
+            {/* New: quick-glance stats strip, derived from documents already in props */}
+        {documents && documents.length > 0 && (
+          <div className="stats-strip">
+            <div className="stats-strip__chip stats-strip__chip--total">
+              <span className="stats-strip__value">{documents.length}</span>
+              <span className="stats-strip__label">Total Docs</span>
+            </div>
+            {Object.entries(statusCounts).map(([status, count]) => (
+              <div className="stats-strip__chip" key={status}>
+                <span className="stats-strip__value">{count}</span>
+                <span className="stats-strip__label">{status}</span>
+              </div>
+            ))}
+          </div>
+        )}
             <div className="docs-search">
               <Search size={14} strokeWidth={2} />
               <input
@@ -469,18 +472,73 @@ export default function HomePanel({
             {filteredDocuments.map(doc => (
               <div
                 key={doc.id}
-                className="doc-card"
-                onClick={() => window.open(doc.file_url, "_blank")}
+                className={`docs-card ${doc.status !== "READY" ? "docs-card--disabled" : ""}`}
+                onClick={() => onDocSelect ? onDocSelect(doc) : window.open(doc.file_url, "_blank")}
               >
-                <div className="doc-card__header">
-                  <div className="doc-card__icon"><File size={20} strokeWidth={1.75} /></div>
-                  <div className="doc-card__badge">PDF</div>
+                <div className="docs-card__preview">
+                  <div className="docs-card__preview-icon">
+                    <FileText size={30} strokeWidth={1.5} />
+                  </div>
+
+                  <div className={`docs-card__status docs-card__status--${doc.status.toLowerCase()}`}>
+                    {doc.status === "PROCESSING" && <Clock size={11} strokeWidth={2.5} />}
+                    {doc.status}
+                  </div>
+
+                  {deletingDocId === doc.id ? (
+                    <LoaderCircle className="docs-card__loader" size={18} />
+                  ) : (
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <button
+                          className="docs-card__menu-btn"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <MoreVertical size={18} strokeWidth={2.5} />
+                        </button>
+                      </DropdownMenuTrigger>
+
+                      <DropdownMenuContent
+                        align="end"
+                        className="docs-card__menu"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <DropdownMenuItem
+                          className="docs-card__menu-item"
+                          onClick={() => onDocSelect ? onDocSelect(doc) : setActiveView('chat')}
+                        >
+                          <MessageSquareText size={16} strokeWidth={2.5} />
+                          Chat
+                        </DropdownMenuItem>
+
+                        <DropdownMenuItem
+                          className="docs-card__menu-item"
+                          onClick={() => onViewDoc ? onViewDoc(doc) : window.open(doc.file_url, "_blank")}
+                        >
+                          <Eye size={16} strokeWidth={2.5} />
+                          View Doc
+                        </DropdownMenuItem>
+
+                        <DropdownMenuSeparator />
+
+                        <DropdownMenuItem
+                          className="docs-card__menu-item docs-card__menu-item--danger"
+                          onClick={() => setDeleteTarget(doc)}
+                        >
+                          <Trash2 size={16} strokeWidth={2.5} />
+                          Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  )}
                 </div>
-                <div className="doc-card__name">{doc.file_name}</div>
-                
-                <div className={`docs-card__status docs-card__status--${doc.status.toLowerCase()}`}>
-                  {doc.status}
-                </div>· {new Date(doc.uploaded_at).toLocaleDateString()}
+
+                <div className="docs-card__info">
+                  <div className="docs-card__name">{doc.file_name}</div>
+                  <div className="docs-card__meta">
+                    Last updated {new Date(doc.uploaded_at).toLocaleDateString()}
+                  </div>
+                </div>
               </div>
             ))}
           </div>
@@ -491,6 +549,46 @@ export default function HomePanel({
         )}
       </div>
 
+      {/* Delete confirmation dialog */}
+      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
+        <AlertDialogContent className="docs-delete-alert">
+          <div className="docs-delete-alert__icon">
+            <AlertTriangle size={22} strokeWidth={2} />
+          </div>
+
+          <AlertDialogHeader>
+            <AlertDialogTitle className="docs-delete-alert__title">
+              Delete this document?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="docs-delete-alert__desc">
+              This action cannot be undone. <strong>{deleteTarget?.file_name}</strong> will be permanently removed from your account.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+
+          <AlertDialogFooter>
+            <AlertDialogCancel className="docs-delete-alert__cancel">
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              className="docs-delete-alert__confirm"
+              onClick={confirmDelete}
+            >
+              <Trash2 size={15} strokeWidth={2.5} />
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
     </div>
   );
 }
+      
+
+
+
+
+
+
+
+

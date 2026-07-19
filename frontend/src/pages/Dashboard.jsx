@@ -123,7 +123,12 @@ export default function Dashboard() {
 
   const panels = {
     home: <HomePanel documents={documents}
-        fetchDocuments={fetchDocuments} setActiveView={setActiveView}/>,
+        fetchDocuments={fetchDocuments} 
+        setActiveView={setActiveView} 
+        docs={documents}
+        onDocSelect={handleDocSelect}
+        onDelete={handleDeleteDocument}
+        deletingDocId={deletingDocId}/>,
 
     chat: activeDoc ? (
       <ChatPanel
@@ -143,9 +148,9 @@ export default function Dashboard() {
 
     summary: <SummaryPanel doc={activeDoc} />,
 
-    quiz: <QuizPanel doc={activeDoc} />,
+    quiz: <QuizPanel doc={activeDoc} documents={documents}/>,
 
-    search: <SearchPanel />,
+    // search: <SearchPanel />,
 
     docs: (
       <DocsPanel

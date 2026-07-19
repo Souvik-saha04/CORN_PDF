@@ -1,6 +1,19 @@
 .docs-panel {
   padding: 2.5rem;
-  max-width: 860px;
+  max-width: 100%;
+  min-height: 100%;
+  background-color: #0a0a0f;
+  background-image:
+    linear-gradient(180deg, rgba(10,10,15,0.68) 0%, rgba(10,10,15,0.84) 100%),
+    url('/clouds-bg.jpg');
+  background-size: cover, 50%;
+  background-position: center, center;
+  background-repeat: no-repeat, repeat;
+  border-radius: var(--radius-xl);
+}
+
+.docs-panel__header {
+  margin-bottom: 1.8rem;
 }
 
 .docs-panel__title {
@@ -15,112 +28,317 @@
 .docs-panel__sub {
   font-size: 0.88rem;
   color: #888;
-  margin-bottom: 2rem;
 }
 
 .docs-panel__grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 1.1rem;
 }
-.docs-card__delete {
-  flex-shrink: 0;
-  margin-left: 12px;
-  cursor: pointer;
-}
+
+/* ── Card ── */
 .docs-card {
   display: flex;
-  align-items: center;
-  gap: 1rem;
+  flex-direction: column;
   background: #161616;
   border: 1px solid rgba(255,255,255,0.07);
-  border-radius: 14px;
-  padding: 1.2rem 1.4rem;
+  border-radius: 18px;
+  padding: 12px;
   cursor: pointer;
   text-align: left;
-  transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
-  width: 100%;
+  transition: border-color 0.25s, transform 0.25s, box-shadow 0.25s;
 }
 
 .docs-card:hover {
   border-color: rgba(245, 197, 24, 0.35);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+  transform: translateY(-3px);
+  box-shadow: 0 10px 26px rgba(0,0,0,0.35);
 }
 
-.docs-card__icon {
-  width: 48px;
-  height: 48px;
-  border-radius: 12px;
+.docs-card--disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.docs-card--disabled:hover {
+  transform: none;
+  border-color: rgba(255,255,255,0.07);
+  box-shadow: none;
+}
+
+/* ── Preview tile ── */
+.docs-card__preview {
+  position: relative;
+  height: 118px;
+  border-radius: 14px;
+  background: linear-gradient(150deg, rgba(255,255,255,0.05), rgba(255,255,255,0.015));
+  border: 1px solid rgba(255,255,255,0.06);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.4rem;
-  flex-shrink: 0;
+  margin-bottom: 12px;
+  overflow: hidden;
 }
 
-.docs-card__name {
-  font-size: 0.88rem;
-  font-weight: 600;
-  color: #f0f0f0;
-  margin-bottom: 4px;
-  line-height: 1.4;
+.docs-card__preview-icon {
+  color: rgba(255,255,255,0.25);
 }
 
-.docs-card__meta {
-  font-size: 0.75rem;
-  color: #666;
-}
-
-
+/* status pill, floating bottom-left over the preview */
 .docs-card__status {
-  display: inline-block;
-  margin-top: 6px;
+  position: absolute;
+  left: 10px;
+  bottom: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   padding: 4px 10px;
   border-radius: 999px;
-  font-size: 0.72rem;
-  font-weight: 600;
+  font-size: 0.64rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
   text-transform: uppercase;
+  backdrop-filter: blur(6px);
 }
 
 .docs-card__status--ready {
   background: rgba(34,197,94,.15);
-  color: #22c55e;
+  color: #4ade80;
+  border: 1px solid rgba(34,197,94,.25);
 }
 
 .docs-card__status--processing {
   background: rgba(245,158,11,.15);
   color: #f59e0b;
+  border: 1px solid rgba(245,158,11,.25);
 }
 
 .docs-card__status--failed {
   background: rgba(239,68,68,.15);
-  color: #ef4444;
+  color: #f87171;
+  border: 1px solid rgba(239,68,68,.25);
 }
 
-
-.docs-card__name {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+/* delete button, floating top-right over the preview */
+/* ── Menu trigger button, floating top-right over the preview ── */
+.docs-card__menu-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: none;
+  background: rgba(0,0,0,0.45);
+  color: #e5e5e5;
+  backdrop-filter: blur(6px);
+  opacity: 0;
+  transform: scale(0.85);
+  transition: all 0.2s ease;
+  cursor: pointer;
 }
 
-.docs-card__info {
-  flex: 1;
-  min-width: 0;
+.docs-card:hover .docs-card__menu-btn {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.docs-card__menu-btn:hover {
+  background: rgba(245, 197, 24, 0.25);
+  color: var(--accent-yellow, #f5c518);
+}
+
+/* keep menu visible/interactive while dropdown is open even without hover */
+.docs-card__menu-btn[data-state="open"] {
+  opacity: 1;
+  transform: scale(1);
+  background: rgba(245, 197, 24, 0.25);
+  color: var(--accent-yellow, #f5c518);
 }
 
 .docs-card__loader {
-    display: inline-block;
-    flex-shrink: 0;
-    animation: spin 0.8s linear infinite;
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  color: var(--accent-yellow, #f5c518);
+  animation: spin 0.8s linear infinite;
 }
-@keyframes spin {
-    from {
-        transform: rotate(0deg);
-    }
 
-    to {
-        transform: rotate(360deg);
-    }
+/* ── Dropdown menu ── */
+.docs-card__menu {
+  min-width: 160px;
+  background: #161616;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 14px;
+  padding: 6px;
+  box-shadow: 0 12px 32px rgba(0,0,0,0.5);
+}
+
+.docs-card__menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #f0f0f0;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.docs-card__menu-item:hover,
+.docs-card__menu-item[data-highlighted] {
+  background: rgba(245, 197, 24, 0.12);
+  color: var(--accent-yellow, #f5c518);
+  outline: none;
+}
+
+.docs-card__menu-item:hover svg,
+.docs-card__menu-item[data-highlighted] svg {
+  color: var(--accent-yellow, #f5c518);
+}
+
+.docs-card__menu-item--danger {
+  color: #f87171;
+}
+
+.docs-card__menu-item--danger:hover,
+.docs-card__menu-item--danger[data-highlighted] {
+  background: rgba(239, 68, 68, 0.12);
+  color: #f87171;
+}
+
+.docs-card__menu-item--danger svg {
+  color: #f87171;
+}
+
+.docs-card__menu [data-radix-dropdown-menu-separator] {
+  margin: 5px 0;
+  background: rgba(255,255,255,0.08);
+}
+
+.docs-card:hover .docs-card__delete {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.docs-card__delete:hover {
+  background: rgba(239,68,68,0.2);
+}
+
+.docs-card__loader {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  color: var(--accent-yellow, #f5c518);
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* ── Info ── */
+.docs-card__info {
+  padding: 0 4px 4px;
+  min-width: 0;
+}
+
+.docs-card__name {
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: #f0f0f0;
+  margin-bottom: 3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.docs-card__meta {
+  font-size: 0.72rem;
+  color: #666;
+}
+
+
+/* ── Delete confirmation alert ── */
+.docs-delete-alert {
+  background: #161616;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 18px;
+  padding: 1.6rem 1.5rem 1.3rem;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+}
+
+.docs-delete-alert__icon {
+  width: 46px;
+  height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 14px;
+  margin-bottom: 0.9rem;
+  background: rgba(239, 68, 68, 0.12);
+  color: #f87171;
+}
+
+.docs-delete-alert__title {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #f0f0f0;
+  letter-spacing: -0.01em;
+}
+
+.docs-delete-alert__desc {
+  font-size: 0.85rem;
+  color: #999;
+  line-height: 1.5;
+  margin-top: 0.4rem;
+}
+
+.docs-delete-alert__desc strong {
+  color: #d4d4d4;
+  font-weight: 600;
+}
+
+.docs-delete-alert__cancel {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.12);
+  color: #d4d4d4;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 9px 18px;
+  transition: all 0.2s ease;
+}
+
+.docs-delete-alert__cancel:hover {
+  background: rgba(255,255,255,0.06);
+  color: #f0f0f0;
+}
+
+.docs-delete-alert__confirm {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #ef4444;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 9px 18px;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 14px rgba(239,68,68,0.3);
+}
+
+.docs-delete-alert__confirm:hover {
+  background: #dc2626;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(239,68,68,0.45);
 }

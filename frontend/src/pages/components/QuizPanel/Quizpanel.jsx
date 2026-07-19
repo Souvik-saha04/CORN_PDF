@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { auth } from "@/firebase/config";
+import { CheckCircle2, XCircle, Sparkles, BookOpen, Gauge, ListOrdered } from "lucide-react";
 import './Quizpanel.css';
 
-export default function QuizPanel({ doc,documents }) {
+export default function QuizPanel({ doc, documents }) {
   const [current, setCurrent] = useState(0);
   const [selected, setSelected] = useState(null);
   const [score, setScore] = useState(0);
@@ -154,185 +155,158 @@ const progress =
     </div>
   );
 
+
   return (
-  <div className="panel quiz-panel">
+    <div className="panel quiz-panel">
 
-    <div className="quiz-header">
-      <h2 className="quiz-header__title">Quiz</h2>
-      <span className="quiz-header__counter">{docTitle}</span>
-    </div>
-
-    {!quizGenerated && (
-
-<div className="quiz-generator">
-
-    <h2>Generate AI Quiz</h2>
-
-    <div className="quiz-form">
-
-        <label>Select Document</label>
-
-        <select
-            value={selectedDocument}
-            onChange={(e)=>setSelectedDocument(e.target.value)}
-        >
-
-            <option value="">Choose Document</option>
-
-            {documents?.map(doc=>(
-                <option
-                    key={doc.id}
-                    value={doc.id}
-                >
-                    {doc.file_name}
-                </option>
-            ))}
-
-        </select>
-
-        <label>Topic / Requirement</label>
-
-        <textarea
-            rows="4"
-            placeholder="Examples: Memory Management "
-            value={requirement}
-            onChange={(e)=>setRequirement(e.target.value)}
-        />
-
-        <label>Difficulty</label>
-
-        <select
-            value={difficulty}
-            onChange={(e)=>setDifficulty(e.target.value)}
-        >
-
-            <option value="easy">Easy</option>
-
-            <option value="medium">Medium</option>
-
-            <option value="hard">Hard</option>
-
-        </select>
-
-        <label>Questions</label>
-
-        <select
-            value={questionCount}
-            onChange={(e)=>setQuestionCount(Number(e.target.value))}
-        >
-
-            <option>5</option>
-
-            <option>10</option>
-
-            <option>15</option>
-
-            <option>20</option>
-
-        </select>
-
-        <button
-            className="btn-accent"
-            onClick={generateQuiz}
-            disabled={loadingQuiz}
-        >
-
-            {loadingQuiz
-                ? "Generating..."
-                : "Generate Quiz"}
-
-        </button>
-
-    </div>
-
-</div>
-
-)}
-
-    {quizGenerated && (
-      <>
-        <div className="quiz-progress-bar">
-          <div
-            className="quiz-progress-bar__fill"
-            style={{ width: `${progress}%` }}
-          />
+      <div className="quiz-header">
+        <div>
+          <h2 className="quiz-header__title">
+            <Sparkles size={20} strokeWidth={2} />
+            Quiz
+          </h2>
         </div>
+        <span className="quiz-header__counter">{docTitle}</span>
+      </div>
 
-        <div className="quiz-card">
+      {!quizGenerated && (
+        <div className="quiz-generator">
+          <h2 className="quiz-generator__title">Generate AI Quiz</h2>
+          <p className="quiz-generator__sub">Pick a document and let AI build your quiz.</p>
 
-          <div className="quiz-card__q-num">
-            Question {current + 1}
-          </div>
+          <div className="quiz-form">
 
-          <div className="quiz-card__question">
-            {q.question}
-          </div>
-
-          <div className="quiz-options">
-
-            {q.options?.map((opt, i) => (
-
-              <button
-                key={i}
-                className={`quiz-option ${
-                  selected !== null
-                    ? i === q.correct
-                      ? "quiz-option--correct"
-                      : selected === i
-                      ? "quiz-option--wrong"
-                      : ""
-                    : ""
-                }`}
-                onClick={() => choose(i)}
-                disabled={selected !== null}
+            <div className="quiz-form__group">
+              <label><BookOpen size={14} strokeWidth={2.5} /> Select Document</label>
+              <select
+                value={selectedDocument}
+                onChange={(e) => setSelectedDocument(e.target.value)}
               >
+                <option value="">Choose Document</option>
+                {documents?.map(doc => (
+                  <option key={doc.id} value={doc.id}>{doc.file_name}</option>
+                ))}
+              </select>
+            </div>
 
-                <div className="quiz-option__letter">
-                  {String.fromCharCode(65 + i)}
-                </div>
+            <div className="quiz-form__group">
+              <label>Topic / Requirement</label>
+              <textarea
+                rows="4"
+                placeholder="Examples: Memory Management"
+                value={requirement}
+                onChange={(e) => setRequirement(e.target.value)}
+              />
+            </div>
 
-                {opt}
+            <div className="quiz-form__row">
+              <div className="quiz-form__group">
+                <label><Gauge size={14} strokeWidth={2.5} /> Difficulty</label>
+                <select
+                  value={difficulty}
+                  onChange={(e) => setDifficulty(e.target.value)}
+                >
+                  <option value="easy">Easy</option>
+                  <option value="medium">Medium</option>
+                  <option value="hard">Hard</option>
+                </select>
+              </div>
 
-              </button>
-
-            ))}
-
-          </div>
-
-          <div className="quiz-nav">
+              <div className="quiz-form__group">
+                <label><ListOrdered size={14} strokeWidth={2.5} /> Questions</label>
+                <select
+                  value={questionCount}
+                  onChange={(e) => setQuestionCount(Number(e.target.value))}
+                >
+                  <option>5</option>
+                  <option>10</option>
+                  <option>15</option>
+                  <option>20</option>
+                </select>
+              </div>
+            </div>
 
             <button
-              className="btn-secondary"
-              disabled={current === 0}
-              onClick={() => {
-                  if(current > 0){
-                      setCurrent(current - 1);
-                      setSelected(null);
-                  }}}>
-              ← Previous
+              className="btn-accent quiz-generator__btn"
+              onClick={generateQuiz}
+              disabled={loadingQuiz}
+            >
+              {loadingQuiz ? (
+                <>Generating<span className="quiz-dots"><span>.</span><span>.</span><span>.</span></span></>
+              ) : (
+                <><Sparkles size={15} strokeWidth={2.5} /> Generate Quiz</>
+              )}
             </button>
 
-            {selected !== null && (
+          </div>
+        </div>
+      )}
 
-              <button
-                className="btn-accent"
-                onClick={next}
-              >
-
-                {current + 1 >= questions.length
-                  ? "Finish"
-                  : "Next →"}
-
-              </button>
-
-            )}
-
+      {quizGenerated && (
+        <>
+          <div className="quiz-progress">
+            <div className="quiz-progress-bar">
+              <div
+                className="quiz-progress-bar__fill"
+                style={{ width: `${progress}%` }}
+              />
+            </div>
+            <span className="quiz-progress__label">{current + 1} / {questions.length}</span>
           </div>
 
-        </div>
-      </>
-    )}
+          <div className="quiz-card">
 
-  </div>
-);
+            <div className="quiz-card__q-num">Question {current + 1}</div>
+            <div className="quiz-card__question">{q.question}</div>
+
+            <div className="quiz-options">
+              {q.options?.map((opt, i) => {
+                const isCorrect = selected !== null && i === q.correct;
+                const isWrong = selected !== null && selected === i && i !== q.correct;
+
+                return (
+                  <button
+                    key={i}
+                    className={`quiz-option ${isCorrect ? "quiz-option--correct" : isWrong ? "quiz-option--wrong" : ""}`}
+                    onClick={() => choose(i)}
+                    disabled={selected !== null}
+                  >
+                    <div className="quiz-option__letter">
+                      {String.fromCharCode(65 + i)}
+                    </div>
+                    <span className="quiz-option__text">{opt}</span>
+                    {isCorrect && <CheckCircle2 className="quiz-option__icon" size={20} strokeWidth={2.2} />}
+                    {isWrong && <XCircle className="quiz-option__icon" size={20} strokeWidth={2.2} />}
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="quiz-nav">
+              <button
+                className="btn-secondary"
+                disabled={current === 0}
+                onClick={() => {
+                  if (current > 0) {
+                    setCurrent(current - 1);
+                    setSelected(null);
+                  }
+                }}
+              >
+                ← Previous
+              </button>
+
+              {selected !== null && (
+                <button className="btn-accent" onClick={next}>
+                  {current + 1 >= questions.length ? "Finish" : "Next →"}
+                </button>
+              )}
+            </div>
+
+          </div>
+        </>
+      )}
+
+    </div>
+  );
 }
