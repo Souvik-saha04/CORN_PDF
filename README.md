@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🌽 CornPDF
+# 🌽 CornPDF (Contextual Organization & Retrieval Network)
 
 ### AI-Powered PDF Question Answering & Document Intelligence Platform
 
