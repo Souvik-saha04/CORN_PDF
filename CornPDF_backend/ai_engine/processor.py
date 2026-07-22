@@ -23,7 +23,7 @@ def get_embeddings():
 
     return GoogleGenerativeAIEmbeddings(
         model="models/gemini-embedding-001",
-        api_key=gemini_api_key,
+        google_api_key=gemini_api_key,
     )
 
 
