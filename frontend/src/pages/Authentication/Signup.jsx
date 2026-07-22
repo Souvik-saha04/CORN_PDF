@@ -7,6 +7,7 @@ import {
 } from "firebase/auth";
 import { auth } from "../../firebase/config";
 import { useNavigate } from "react-router-dom";
+import { buildApiUrl } from "../../lib/api";
 import "./Signup.css";
 
 const GoogleIcon = () => (
@@ -44,7 +45,7 @@ export function Signup() {
 
       const token = await userCred.user.getIdToken();
 
-      await fetch("http://127.0.0.1:8000/user/auth/", {
+      await fetch(buildApiUrl("/user/auth/"), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -72,7 +73,7 @@ export function Signup() {
 
       const token = await result.user.getIdToken();
 
-      await fetch("http://127.0.0.1:8000/user/auth/", {
+      await fetch(buildApiUrl("/user/auth/"), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

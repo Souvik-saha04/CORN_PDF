@@ -12,6 +12,7 @@ import DocsPanel from "./components/DocsPanel/DocsPanel";
 
 import { auth } from "../firebase/config";
 import { onAuthStateChanged } from "firebase/auth";
+import { buildApiUrl } from "../lib/api";
 
 export default function Dashboard() {
   const [user, setUser] = useState(null);
@@ -52,7 +53,7 @@ export default function Dashboard() {
     const token = await user.getIdToken();
 
     const response = await fetch(
-      "http://127.0.0.1:8000/documents/",
+      buildApiUrl("/documents/"),
       {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -87,7 +88,7 @@ console.log(processedDocuments);
         const token = await user.getIdToken();
 
         const response = await fetch(
-            `http://127.0.0.1:8000/documents/${docId}/delete/`,
+            buildApiUrl(`/documents/${docId}/delete/`),
             {
                 method: "DELETE",
                 headers: {

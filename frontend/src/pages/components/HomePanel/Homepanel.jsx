@@ -22,8 +22,7 @@ import {
 
 import { signOut } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
-import { auth } from '@/firebase/config';
-
+import { auth } from '@/firebase/config';import { buildApiUrl } from "@/lib/api";
 export function CustomAlert({ open, setOpen, title, message }) {
   // Purely presentational — picks an icon/tone based on the title text.
   const lower = (title || "").toLowerCase();
@@ -221,7 +220,7 @@ export default function HomePanel({
     formData.append("file", file);
 
     const response = await fetch(
-      "http://127.0.0.1:8000/documents/create/",
+      buildApiUrl("/documents/create/"),
       {
         method: "POST",
         headers: {

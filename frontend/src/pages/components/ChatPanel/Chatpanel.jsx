@@ -12,6 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { buildApiUrl } from "@/lib/api";
 
 export default function ChatPanel({ doc, documents, onDocSelect, userName }) {
   const [messages, setMessages] = useState([]);
@@ -48,7 +49,7 @@ export default function ChatPanel({ doc, documents, onDocSelect, userName }) {
       setSteps((prev) => [...prev, "Retrieving relevant chunks"]);
       const token = await auth.currentUser.getIdToken();
 
-      const response = await fetch("http://127.0.0.1:8000/ai/ask_question/", {
+      const response = await fetch(buildApiUrl("/ai/ask_question/"), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

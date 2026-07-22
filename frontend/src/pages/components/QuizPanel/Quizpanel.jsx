@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { auth } from "@/firebase/config";
+import { buildApiUrl } from "@/lib/api";
 import { CheckCircle2, XCircle, Sparkles, BookOpen, Gauge, ListOrdered } from "lucide-react";
 import './Quizpanel.css';
 
@@ -61,7 +62,7 @@ const progress =
         const token = await auth.currentUser.getIdToken();
 
         const response = await fetch(
-            "http://127.0.0.1:8000/ai/generate/",
+            buildApiUrl("/ai/generate/"),
             {
 
                 method:"POST",
