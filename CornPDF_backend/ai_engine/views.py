@@ -8,7 +8,7 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 import json
 from utils.firebase_auth import get_user_from_token
 from ai_engine.processor import get_embeddings, get_index
-
+import os
 
 def get_llm():
     gemini_api_key = os.getenv("GEMINI_API_KEY") or os.getenv("Gemini_API_Key")
