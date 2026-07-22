@@ -8,6 +8,7 @@ from langchain_pinecone import PineconeVectorStore
 from langchain_community.document_loaders import PyPDFLoader
 import os
 from dotenv import load_dotenv
+import traceback
 
 load_dotenv()
 
@@ -37,15 +38,20 @@ def process_document(document):
         document.save()
 
         response = requests.get(
-            document.file_url,
-            timeout=30
+        document.file_url,
+            stream=True,
+            timeout=(30, 300)   # 30 sec connection timeout, 300 sec read timeout
         )
 
-        if response.status_code != 200:
-            raise Exception("Unable to download PDF from Cloudinary.")
+        response.raise_for_status()
 
         with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as temp_pdf:
-            temp_pdf.write(response.content)
+
+            for chunk in response.iter_content(chunk_size=1024 * 1024):   # 1 MB chunks
+
+                if chunk:
+                    temp_pdf.write(chunk)
+
             temp_pdf_path = temp_pdf.name
 
         loader = PyPDFLoader(temp_pdf_path)
@@ -53,8 +59,8 @@ def process_document(document):
         pages = loader.lazy_load()
 
         splitter = RecursiveCharacterTextSplitter(
-            chunk_size=1000,
-            chunk_overlap=200
+            chunk_size=500,
+            chunk_overlap=50
         )
 
         vectorstore = PineconeVectorStore(
@@ -131,7 +137,7 @@ def process_document(document):
 
         document.status = "FAILED"
         document.save()
-
+        traceback.print_exc()
         raise e
 
     finally:

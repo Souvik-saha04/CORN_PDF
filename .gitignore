@@ -6,7 +6,7 @@ cornpdf-firebase-adminsdk-fbsvc-94f65f7884.json
 
 
 .env
-*.json
+
 __pycache__/
 
 
