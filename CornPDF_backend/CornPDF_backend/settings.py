@@ -47,7 +47,11 @@ ALLOWED_HOSTS = [
     "localhost",
     "127.0.0.1",
 ]
-
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "https://corn-pdf.vercel.app/",
+]
 # Application definition
 
 INSTALLED_APPS = [
@@ -84,14 +88,7 @@ REST_FRAMEWORK={
     'DEFAULT_AUTHENTICATION_CLASSES':("user_accounts.authentication.FirebaseAuthentication",),
 }
 
-import cloudinary
-import os
 
-cloudinary.config(
-    cloud_name=os.getenv("CLOUD_NAME"),
-    api_key=os.getenv("API_KEY"),
-    api_secret=os.getenv("API_SECRET"),
-)
 
 TEMPLATES = [
     {
@@ -157,5 +154,4 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
-STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
