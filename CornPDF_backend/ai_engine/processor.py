@@ -12,20 +12,45 @@ import traceback
 
 load_dotenv()
 
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY") or os.getenv("Gemini_API_Key")
 
-if not GEMINI_API_KEY:
-    raise RuntimeError(
-        "Missing Gemini API key. Set GEMINI_API_KEY (or Gemini_API_Key) in your environment."
+def get_embeddings():
+    gemini_api_key = os.getenv("GEMINI_API_KEY") or os.getenv("Gemini_API_Key")
+
+    if not gemini_api_key:
+        raise RuntimeError(
+            "Missing Gemini API key. Set GEMINI_API_KEY (or Gemini_API_Key) in your environment."
+        )
+
+    return GoogleGenerativeAIEmbeddings(
+        model="models/gemini-embedding-001",
+        api_key=gemini_api_key,
     )
 
-embeddings = GoogleGenerativeAIEmbeddings(
-    model="models/gemini-embedding-001",
-    api_key=GEMINI_API_KEY
-)
 
-pc = Pinecone(api_key=os.getenv("PINECONE_SECRET"))
-index = pc.Index("pdf-qna-3072")
+def get_index():
+    pinecone_api_key = os.getenv("PINECONE_SECRET")
+
+    if not pinecone_api_key:
+        raise RuntimeError("Missing Pinecone API key. Set PINECONE_SECRET in your environment.")
+
+    pc = Pinecone(api_key=pinecone_api_key)
+    return pc.Index("pdf-qna-3072")
+
+
+def delete_document_vectors(document):
+    try:
+        index = get_index()
+        chunks = Chunk.objects.filter(document=document)
+
+        if chunks.exists():
+            vector_ids = [f"{document.id}_{chunk.id}" for chunk in chunks]
+            index.delete(ids=vector_ids)
+
+        return True
+
+    except Exception as e:
+        print(f"Pinecone deletion failed: {e}")
+        return False
 
 
 def process_document(document):
@@ -64,8 +89,8 @@ def process_document(document):
         )
 
         vectorstore = PineconeVectorStore(
-            index=index,
-            embedding=embeddings,
+            index=get_index(),
+            embedding=get_embeddings(),
         )
 
         BATCH_SIZE = 100

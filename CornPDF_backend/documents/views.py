@@ -8,7 +8,7 @@ from rest_framework import status
 
 from .models import Docs
 from utils.firebase_auth import get_user_from_token
-from ai_engine.processor import process_document,index
+from ai_engine.processor import process_document, delete_document_vectors
 from ai_engine.models import Chunk
 
 
@@ -168,16 +168,7 @@ def delete_document(request, doc_id):
     # ------------------------------------
 
     try:
-        chunks = Chunk.objects.filter(document=doc)
-
-        if chunks.exists():
-
-            vector_ids = [
-                f"{doc.id}_{chunk.id}"
-                for chunk in chunks
-            ]
-
-            index.delete(ids=vector_ids)
+        delete_document_vectors(doc)
 
     except Exception as e:
         print(f"Pinecone deletion failed: {e}")
