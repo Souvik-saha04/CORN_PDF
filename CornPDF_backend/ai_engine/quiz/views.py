@@ -3,42 +3,34 @@ from django.views.decorators.csrf import csrf_exempt
 
 from documents.models import Docs
 
-from pinecone import Pinecone
-from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_pinecone import PineconeVectorStore
 
 from utils.firebase_auth import get_user_from_token
+from ai_engine.processor import get_embeddings, get_index
 
 import json
 import os
-from dotenv import load_dotenv
 
-load_dotenv()
 
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY") or os.getenv("Gemini_API_Key")
+def get_llm():
+    gemini_api_key = os.getenv("GEMINI_API_KEY") or os.getenv("Gemini_API_Key")
 
-if not GEMINI_API_KEY:
-    raise RuntimeError(
-        "Missing Gemini API key."
+    if not gemini_api_key:
+        raise RuntimeError("Missing Gemini API key. Set GEMINI_API_KEY (or Gemini_API_Key) in your environment.")
+
+    return ChatGoogleGenerativeAI(
+        model="gemini-3.1-flash-lite",
+        temperature=0.3,
+        api_key=gemini_api_key,
     )
 
-embeddings = GoogleGenerativeAIEmbeddings(
-    model="models/gemini-embedding-001",
-    api_key=GEMINI_API_KEY
-)
 
-pc = Pinecone(
-    api_key=os.getenv("PINECONE_SECRET")
-)
-
-index = pc.Index("pdf-qna-3072")
-
-llm = ChatGoogleGenerativeAI(
-    model="gemini-3.1-flash-lite",
-    temperature=0.3,
-    api_key=GEMINI_API_KEY
-)
+def get_vectorstore():
+    return PineconeVectorStore(
+        index=get_index(),
+        embedding=get_embeddings(),
+    )
 
 
 @csrf_exempt
@@ -119,10 +111,7 @@ def generate_quiz(request):
             status=404
         )
 
-    vectorstore = PineconeVectorStore(
-        index=index,
-        embedding=embeddings
-    )
+    vectorstore = get_vectorstore()
     try:
         retriever = vectorstore.as_retriever(
             search_kwargs={
@@ -211,7 +200,7 @@ def generate_quiz(request):
     {context}
     """
 
-        response = llm.invoke(prompt)
+        response = get_llm().invoke(prompt)
 
         if isinstance(response.content, str):
 
