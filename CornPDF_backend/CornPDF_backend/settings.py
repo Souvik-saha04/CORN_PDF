@@ -50,7 +50,17 @@ ALLOWED_HOSTS = [
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
-    "https://corn-pdf.vercel.app/",
+    "https://corn-pdf.vercel.app",
+]
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    r"^https://.*\.vercel\.app$",
+]
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_HEADERS = ["*"]
+CORS_ALLOW_METHODS = ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]
+CSRF_TRUSTED_ORIGINS = [
+    "https://corn-pdf.onrender.com",
+    "https://corn-pdf.vercel.app",
 ]
 # Application definition
 
@@ -78,9 +88,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-]
-CORS_ALLOWED_ORIGINS = [
-
 ]
 ROOT_URLCONF = 'CornPDF_backend.urls'
 
